@@ -1,0 +1,12 @@
+{
+  "name": "linked-list",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test"
+  },
+  "keywords": [],
+  "author": "David Wolgemuth <davidjwolgemuth@gmail.com> (https://github.com/david-wolgemuth)",
+  "license": "ISC"
+}
