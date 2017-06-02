@@ -36,7 +36,7 @@ const fail = () => {
 
 const pending = () => {
   process.stdout.write('_');
-}
+};
 
 module.exports = { runTest, runAllTests, equal };
 
