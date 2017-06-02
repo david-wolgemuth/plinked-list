@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: index.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: index.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>(function(global){
+  'use strict';
+
+  class List
+  {
+    /**
+     * Create instance of List
+     * @memberof List#
+     */
+    constructor ()
+    {
+      /**
+       * Head node
+       * @type {ListNode}
+       * @private
+       */
+      this._head = null;
+      /**
+       * Tail node
+       * @type {ListNode}
+       * @private
+       */
+      this._tail = null;
+      this.extend(Array.prototype.slice.call(arguments));
+    }
+    /**
+     * Append value to list
+     * @param {any} value Value to append to list
+     * @return {List} Instance of list for chaining
+     * @memberof List#
+     */
+    append (value)
+    {
+      const backNode = new ListNode(value);
+      if (!this._head) {
+        this._head = backNode;
+        this._tail = backNode;
+      } else {
+        backNode.prev = this._tail;
+        this._tail.next = backNode;
+        this._tail = backNode;
+      }
+      return this;
+    }
+    /**
+     * Prepend value to list
+     * @param {any} value Value to prepend to list
+     * @return {List} Instance of list for chaining
+     * @memberof List#
+     */
+    prepend (value)
+    {
+      const newNode = new ListNode(value, this._head);
+      if (!this._head) {
+        this._tail = newNode;
+      } else {
+        this._head.prev = newNode;
+      }
+      this._head = newNode;
+      return this;
+    }
+    /**
+     * Remove last element from list
+     * @return {any} Removed element
+     * @memberof List#
+     */
+    pop ()
+    {
+      if (!this._tail) {
+        return null;
+      }
+      const value = this._tail.value;
+      this._tail = this._tail.prev;
+      if (!this._tail) {
+        // List is now empty
+        this._head = null;
+      } else {
+        this._tail.next = null;
+      }
+      return value;
+    }
+    /**
+     * Remove first element from list
+     * @return {any} Removed element
+     * @memberof List#
+     */
+    shift ()
+    {
+      if (!this._head) {
+        return null;
+      }
+      const value = this._head.value;
+      this._head = this._head.next;
+      if (!this._head) {
+        this._tail = null;
+      } else {
+        // List is now empty
+        this._head.prev = null;
+      }
+      return value;
+    }
+    /**
+     * Test if values are equal
+     * @callback isEqualCallback
+     * @param {any} valueA
+     * @param {any} valueB 
+     * @return {Boolean} values equal
+     * @memberof List
+     */
+    /**
+     * Test if 2 lists are equivalent
+     * @param {List} list
+     * @param {isEqualCallback} [equal=(a, b) => (a === b)] test
+     * @return {Boolean} are equal
+     * @memberof List
+     */
+    equal (list, equal=(a, b) => (a === b))
+    {
+      let runnerA = this._head;
+      let runnerB = list._head;
+      while (runnerA) {
+        if (!runnerB) {
+          return false;
+        }
+        if (!equal(runnerA.value, runnerB.value)) {
+          return false;
+        }
+        runnerA = runnerA.next;
+        runnerB = runnerB.next;
+      }
+      if (runnerB) {
+        return false;
+      }
+      return true;
+    }
+    /**
+     * Create copy of the list instance
+     * @return {List} new copy of list
+     * @memberof List#
+     */
+    copy ()
+    {
+      const copy = new List();
+      this.each(value => copy.append(value));
+      return copy;
+    }
+    /**
+     * Concat list with second list
+     * @param {List} list second list to concat
+     * @return {List} new list combining values of previous lists
+     * @memberof List#
+     */
+    concat (list)
+    {
+      const newList = this.copy();
+      list.each(value => newList.append(value));
+      return newList;
+    }
+    /**
+     * Extend list with all values of array or list
+     * @param {List|Array} list values to add to list
+     * @return {List} instance of list for chaining
+     * @memberof List#
+     */
+    extend (list)
+    {
+      if (list instanceof Array) {
+        list.forEach(value => this.append(value));
+      } else if (list instanceof List) {
+        list.each(value => this.append(value));
+      }
+      return this;
+    }
+    /**
+     * EachCallback
+     * @callback eachCallback
+     * @param {any} value element of list
+     * @param {int} index index of element in list
+     * @return {Boolean} return false to end loop
+     */
+    /**
+     * Run callback on each element of List
+     * @param {eachCallback} callback
+     * @return {List} instance of list for chaining
+     * @memberof List#
+     */
+    each (callback)
+    {
+      this._eachNode((node, index) => callback(node.value, index));
+      return this;
+    }
+    /**
+     * ReduceCallback
+     * @callback reduceCallback
+     * @param {any} acc accumulated value
+     * @param {any} value element of list
+     * @param {int} index index of element in list
+     * @return {any} new accumulated value
+     */
+    /**
+     * Reduct List to single value
+     * @param {reduceCallback} callback 
+     * @param {any} init initial value for accumulation
+     * @returns {any} accumulated value
+     * @memberof List#
+     */
+    reduce (callback, init)
+    {
+      return this._reduceNodes((acc, node, index) => callback(acc, node.value, index), init);
+    }
+    /**
+     * FindCallback
+     * @callback findCallback
+     * @param {any} value value of list
+     * @return {Boolean} return truthy if found
+     */
+    /**
+     * Find element
+     * @param {findCallback} callback 
+     * @return {any} found element
+     * @memberof List#
+     */
+    find (callback)
+    {
+      let found = null;
+      this.each((value) => {
+        if (callback(value)) {
+          found = value;
+          return false; // stop iterator
+        }
+      });
+      return found;
+    }
+    /**
+     * Get first element in list
+     * @return {any} first element in list
+     * @memberof List#
+     */
+    first ()
+    {
+      return (this._head) ? this._head.value : null;
+    }
+    /**
+     * Get last element in list
+     * @return {any} last element in list
+     * @memberof List#
+     */
+    last ()
+    {
+      return (this._tail) ? this._tail.value : null;
+    }
+    /**
+     * Create array from List
+     * @returns {Array} elements of list in array
+     * @memberof List#
+     */
+    toArray ()
+    {
+      const array = [];
+      this.each(value => { array.push(value); });
+      return array;
+    }
+    /**
+     * Create string from List
+     * @return {string} string representation of list
+     * @memberof List#
+     */
+    toString ()
+    {
+      return this._reduceNodes((string, node) => 
+        (node === this._tail) 
+          ? string + JSON.stringify(node.value)
+          : string + JSON.stringify(node.value) + ', '
+      , 'List(') + ')';
+    }
+    join (separator=",")
+    {
+      return this._reduceNodes((string, node) => 
+        (node === this._tail) 
+          ? string + node.value
+          : string + node.value + separator
+      , '');
+    
+    }
+    /**
+     * ReduceNodesCallback
+     * @callback reduceNodesCallback
+     * @param {any} acc accumulated value of nodes
+     * @param {ListNode} node current node of list
+     * @param {int} index index of node
+     * @return {any} new accumulated value of nodes
+     */
+    /**
+     * Reduce all nodes to single value
+     * @param {reduceNodesCallback} callback 
+     * @param {any} init initial value of accumulation
+     * @returns {any} accumulated value of nodex
+     * @private
+     * @memberof List#
+     */
+    _reduceNodes (callback, init)
+    {
+      let acc = (init === undefined) ? this.first() : init;
+      this._eachNode((node, index) => {
+        if (index === 0 &amp;&amp; init === undefined) {
+          return;
+        }
+        acc = callback(acc, node, index);
+      });
+      return acc;
+    }
+    /**
+     * EachNodeCallback
+     * @callback eachNodeCallback
+     * @param {ListNode} node current node of list
+     * @param {int} index index of current node
+     * @return {Boolean} return false to terminate loop
+     * @memberof List#
+     */
+    /**
+     * @param {eachNodeCallback} callback 
+     * @return {List} instance of list for chaining
+     * @private
+     * @memberof List#
+     */
+    _eachNode (callback)
+    {
+      let index = 0;
+      for (let runner = this._head; runner; runner = runner.next) {
+        if (callback(runner, index) === false) {
+          return;
+        }
+        index += 1;
+      }
+      return this;
+    }
+    /**
+     * FindNodeCallback
+     * @callback findNodeCallback
+     * @param {node} node current node of list
+     * @return {Boolean} return truthy if found
+     */
+    /**
+     * Find node
+     * @param {findNodeCallback} callback 
+     * @return {ListNode} found node
+     * @private
+     * @memberof List#
+     */
+    _findNode (callback)
+    {
+      if (typeof(callback) !== "function") {
+        return;
+      }
+      for (let runner = this._head; runner; runner = runner.next) {
+        if (callback(runner)) {
+          return runner;
+        }
+      }
+      return null;
+    }
+  }
+
+  class ListNode
+  {
+    /**
+     * Create instance of ListNode
+     * @param {any} value node's value
+     * @param {ListNode} [next=null] next node
+     * @param {ListNode} [prev=null] previous node
+     * @memberof ListNode#
+     */
+    constructor (value, next=null, prev=null)
+    {
+      this.value = value;
+      this.next  = next;
+      this.prev  = prev;
+    }
+  }
+
+
+  // https://gist.github.com/CrocoDillon/9990078  Support AMD, CommonJS, Node.js, Globals
+  // AMD support
+  if (typeof define === 'function' &amp;&amp; define.amd) {
+    define(function () { return List; });
+  // CommonJS and Node.js module support.
+  } else if (typeof exports !== 'undefined') {
+    // Support Node.js specific `module.exports` (which can be a function)
+    if (typeof module !== 'undefined' &amp;&amp; module.exports) {
+        exports = module.exports = List;
+    }
+    // But always support CommonJS module 1.1.1 spec (`exports` cannot be a function)
+    exports.List = List;
+  } else {
+    global.List = List;
+  }
+
+})(this);
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="List_List.html">List</a></li><li><a href="ListNode_ListNode.html">ListNode</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Jun 02 2017 13:55:45 GMT-0500 (CDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
