@@ -2,7 +2,7 @@
 
 List constructor.
 
-### [View The Docs](https://david-wolgemuth.github.io/plinked-list/docs)
+### [View The Docs](https://david-wolgemuth.github.io/plinked-list/docs/List_List.html)
 
 ### Basic Usage
 
