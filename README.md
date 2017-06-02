@@ -6,7 +6,13 @@ List constructor.
 
 ### Basic Usage
 
+```
+npm install plinked-list
+```
+
 ```javascript
+const List = require('plinked-list');
+
 const list = new List('b', 'c', 'd');
 list.append('e');
 list.prepend('a');
